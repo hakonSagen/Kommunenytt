@@ -1,0 +1,180 @@
+services:
+  - type: web
+    name: kommunenytt
+    runtime: python
+    plan: starter
+    buildCommand: pip install -r requirements.txt && playwright install --with-deps chromium
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-5.2
+      - key: INDRE_FOSEN_URL
+        value: https://www.indrefosen.kommune.no/tjenester/politikk-planer-og-okonomi/politikk/moteoversikt-og-sok-etter-vedtak/
+      - key: OSEN_URL
+        value: https://www.osen.kommune.no/vare-tjenester/politikk-planer-og-organisasjon/politikk/politiske-moter-og-saksdokumenter/
+      - key: AFJORD_URL
+        value: https://www.afjord.kommune.no/tjenester/politikk-planer-og-organisasjon/politikk-og-okonomi/politisk-moteplan-og-saksdokumenter/
+      - key: ORLAND_URL
+        value: https://www.orland.kommune.no/vare-tjenester/politikk-planer-og-organisasjon/politikk/politisk-moteplan/
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: 587
+      - key: SMTP_USERNAME
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+      - key: SMTP_TO
+        sync: false
+      - key: SMTP_USE_TLS
+        value: true
+      - key: DRY_RUN_EMAIL
+        value: false
+
+  - type: cron
+    name: kommunenytt-daily-indre-fosen
+    runtime: python
+    schedule: "0 6,7,10,11,13,14 * * *"
+    buildCommand: pip install -r requirements.txt && playwright install --with-deps chromium
+    startCommand: python -m app.cli --only-at-hours 8,12,15
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-5.2
+      - key: INDRE_FOSEN_URL
+        value: https://www.indrefosen.kommune.no/tjenester/politikk-planer-og-okonomi/politikk/moteoversikt-og-sok-etter-vedtak/
+      - key: OSEN_URL
+        value: https://www.osen.kommune.no/vare-tjenester/politikk-planer-og-organisasjon/politikk/politiske-moter-og-saksdokumenter/
+      - key: AFJORD_URL
+        value: https://www.afjord.kommune.no/tjenester/politikk-planer-og-organisasjon/politikk-og-okonomi/politisk-moteplan-og-saksdokumenter/
+      - key: ORLAND_URL
+        value: https://www.orland.kommune.no/vare-tjenester/politikk-planer-og-organisasjon/politikk/politisk-moteplan/
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: 587
+      - key: SMTP_USERNAME
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+      - key: SMTP_TO
+        sync: false
+      - key: SMTP_USE_TLS
+        value: true
+      - key: DRY_RUN_EMAIL
+        value: false
+
+  - type: cron
+    name: kommunenytt-daily-osen
+    runtime: python
+    schedule: "0 6,7,10,11,13,14 * * *"
+    buildCommand: pip install -r requirements.txt && playwright install --with-deps chromium
+    startCommand: python -m app.cli --municipality osen --only-at-hours 8,12,15
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-5.2
+      - key: INDRE_FOSEN_URL
+        value: https://www.indrefosen.kommune.no/tjenester/politikk-planer-og-okonomi/politikk/moteoversikt-og-sok-etter-vedtak/
+      - key: OSEN_URL
+        value: https://www.osen.kommune.no/vare-tjenester/politikk-planer-og-organisasjon/politikk/politiske-moter-og-saksdokumenter/
+      - key: AFJORD_URL
+        value: https://www.afjord.kommune.no/tjenester/politikk-planer-og-organisasjon/politikk-og-okonomi/politisk-moteplan-og-saksdokumenter/
+      - key: ORLAND_URL
+        value: https://www.orland.kommune.no/vare-tjenester/politikk-planer-og-organisasjon/politikk/politisk-moteplan/
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: 587
+      - key: SMTP_USERNAME
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+      - key: SMTP_TO
+        sync: false
+      - key: SMTP_USE_TLS
+        value: true
+      - key: DRY_RUN_EMAIL
+        value: false
+
+  - type: cron
+    name: kommunenytt-daily-afjord
+    runtime: python
+    schedule: "0 6,7,10,11,13,14 * * *"
+    buildCommand: pip install -r requirements.txt && playwright install --with-deps chromium
+    startCommand: python -m app.cli --municipality afjord --only-at-hours 8,12,15
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-5.2
+      - key: INDRE_FOSEN_URL
+        value: https://www.indrefosen.kommune.no/tjenester/politikk-planer-og-okonomi/politikk/moteoversikt-og-sok-etter-vedtak/
+      - key: OSEN_URL
+        value: https://www.osen.kommune.no/vare-tjenester/politikk-planer-og-organisasjon/politikk/politiske-moter-og-saksdokumenter/
+      - key: AFJORD_URL
+        value: https://www.afjord.kommune.no/tjenester/politikk-planer-og-organisasjon/politikk-og-okonomi/politisk-moteplan-og-saksdokumenter/
+      - key: ORLAND_URL
+        value: https://www.orland.kommune.no/vare-tjenester/politikk-planer-og-organisasjon/politikk/politisk-moteplan/
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: 587
+      - key: SMTP_USERNAME
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+      - key: SMTP_TO
+        sync: false
+      - key: SMTP_USE_TLS
+        value: true
+      - key: DRY_RUN_EMAIL
+        value: false
+
+  - type: cron
+    name: kommunenytt-daily-orland
+    runtime: python
+    schedule: "0 6,7,10,11,13,14 * * *"
+    buildCommand: pip install -r requirements.txt && playwright install --with-deps chromium
+    startCommand: python -m app.cli --municipality orland --only-at-hours 8,12,15
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-5.2
+      - key: INDRE_FOSEN_URL
+        value: https://www.indrefosen.kommune.no/tjenester/politikk-planer-og-okonomi/politikk/moteoversikt-og-sok-etter-vedtak/
+      - key: OSEN_URL
+        value: https://www.osen.kommune.no/vare-tjenester/politikk-planer-og-organisasjon/politikk/politiske-moter-og-saksdokumenter/
+      - key: AFJORD_URL
+        value: https://www.afjord.kommune.no/tjenester/politikk-planer-og-organisasjon/politikk-og-okonomi/politisk-moteplan-og-saksdokumenter/
+      - key: ORLAND_URL
+        value: https://www.orland.kommune.no/vare-tjenester/politikk-planer-og-organisasjon/politikk/politisk-moteplan/
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: 587
+      - key: SMTP_USERNAME
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+      - key: SMTP_TO
+        sync: false
+      - key: SMTP_USE_TLS
+        value: true
+      - key: DRY_RUN_EMAIL
+        value: false
