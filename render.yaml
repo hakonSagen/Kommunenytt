@@ -4,7 +4,6 @@ services:
     runtime: docker
     dockerfilePath: ./Dockerfile
     plan: starter
-    dockerCommand: /bin/sh -c 'uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-10000}'
     envVars:
       - key: OPENAI_API_KEY
         sync: false
