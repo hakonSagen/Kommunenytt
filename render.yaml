@@ -1,10 +1,10 @@
 services:
   - type: web
     name: kommunenytt
-    runtime: python
+    runtime: docker
+    dockerfilePath: ./Dockerfile
     plan: starter
-    buildCommand: pip install -r requirements.txt && playwright install --with-deps chromium
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    dockerCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: OPENAI_API_KEY
         sync: false
@@ -37,10 +37,10 @@ services:
 
   - type: cron
     name: kommunenytt-daily-indre-fosen
-    runtime: python
+    runtime: docker
+    dockerfilePath: ./Dockerfile
     schedule: "0 6,7,10,11,13,14 * * *"
-    buildCommand: pip install -r requirements.txt && playwright install --with-deps chromium
-    startCommand: python -m app.cli --only-at-hours 8,12,15
+    dockerCommand: python -m app.cli --only-at-hours 8,12,15
     envVars:
       - key: OPENAI_API_KEY
         sync: false
@@ -73,10 +73,10 @@ services:
 
   - type: cron
     name: kommunenytt-daily-osen
-    runtime: python
+    runtime: docker
+    dockerfilePath: ./Dockerfile
     schedule: "0 6,7,10,11,13,14 * * *"
-    buildCommand: pip install -r requirements.txt && playwright install --with-deps chromium
-    startCommand: python -m app.cli --municipality osen --only-at-hours 8,12,15
+    dockerCommand: python -m app.cli --municipality osen --only-at-hours 8,12,15
     envVars:
       - key: OPENAI_API_KEY
         sync: false
@@ -109,10 +109,10 @@ services:
 
   - type: cron
     name: kommunenytt-daily-afjord
-    runtime: python
+    runtime: docker
+    dockerfilePath: ./Dockerfile
     schedule: "0 6,7,10,11,13,14 * * *"
-    buildCommand: pip install -r requirements.txt && playwright install --with-deps chromium
-    startCommand: python -m app.cli --municipality afjord --only-at-hours 8,12,15
+    dockerCommand: python -m app.cli --municipality afjord --only-at-hours 8,12,15
     envVars:
       - key: OPENAI_API_KEY
         sync: false
@@ -145,10 +145,10 @@ services:
 
   - type: cron
     name: kommunenytt-daily-orland
-    runtime: python
+    runtime: docker
+    dockerfilePath: ./Dockerfile
     schedule: "0 6,7,10,11,13,14 * * *"
-    buildCommand: pip install -r requirements.txt && playwright install --with-deps chromium
-    startCommand: python -m app.cli --municipality orland --only-at-hours 8,12,15
+    dockerCommand: python -m app.cli --municipality orland --only-at-hours 8,12,15
     envVars:
       - key: OPENAI_API_KEY
         sync: false

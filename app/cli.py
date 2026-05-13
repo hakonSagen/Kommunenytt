@@ -6,6 +6,7 @@ import json
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+from app.config import ensure_directories
 from app.jobs import run_afjord_once, run_indre_fosen_once, run_orland_once, run_osen_once
 from db.database import init_db
 
@@ -64,6 +65,7 @@ def main() -> None:
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return
 
+    ensure_directories()
     init_db()
     if args.municipality == "osen":
         result = asyncio.run(run_osen_once(force=args.force, protocol_index=args.protocol_index))
