@@ -84,12 +84,17 @@ async def run_protocol_job(fetch_document, db: Session | None, force: bool, prot
     article = generate_article(protocol)
     article = save_article_html(article)
     html = article_to_html(article)
-    email_sent = send_article_email(article, html)
+    email_sent = False
+    email_error = None
+    try:
+        email_sent = send_article_email(article, html)
+    except Exception as error:
+        email_error = f"{type(error).__name__}: {error}"
     save_article_record(article, db)
     mark_processed(document, db)
 
     return {
-        "status": "ok",
+        "status": "ok" if email_error is None else "email_failed",
         "municipality": document.municipality,
         "document_title": document.title,
         "source_url": document.source_url,
@@ -99,6 +104,7 @@ async def run_protocol_job(fetch_document, db: Session | None, force: bool, prot
         "html_path": article.html_path,
         "email_attempted": True,
         "email_sent": email_sent,
+        "email_error": email_error,
         "cases_found": len(protocol.cases),
         "protocol_index": protocol_index,
         "supporting_documents": len(document.supporting_documents),
