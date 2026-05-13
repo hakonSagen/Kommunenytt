@@ -46,7 +46,8 @@ def generate_article(protocol: ParsedProtocol) -> Article:
                 "Du skriver ferdige nyhetsartikler basert på kommunestyresaker. "
                 "Du må kun bruke informasjon som finnes i teksten du får. "
                 "Du skal ikke dikte opp fakta, hendelser, sitater eller tall. "
-                "Du kan omformulere og forenkle språket for å gjøre det mer lesbart. "
+                "Du skal bruke møteinnkalling og saksliste aktivt når de inneholder relevante fakta. "
+                "Du skal gjøre tungt saks- og vedtaksspråk enkelt å forstå. "
                 "Hvis noe er uklart eller mangler, skal du ikke gjette. "
                 "Skriv alltid på norsk bokmål. Hvis kildeteksten er på nynorsk, oversetter du til bokmål."
             ),
@@ -89,26 +90,34 @@ def build_prompt(protocol: ParsedProtocol, case: ParsedCase) -> str:
         "tall": case.numbers,
         "protokollutdrag": case.source_excerpt[:4500],
         "moteinnkalling_og_saksliste_utdrag": supporting_excerpt,
+        "faktalinjer_fra_moteinnkalling": extract_supporting_fact_lines(supporting_excerpt),
     }
     return (
         "Skriv en ferdig nyhetsartikkel basert på denne kommunestyresaken.\n"
         "Svar kun som JSON med feltene title, ingress, body og some.\n"
-        "Protokollen er hovedkilde for vedtak og avstemning. "
-        "Møteinnkalling og saksliste skal brukes aktivt som støttekilder for bakgrunn, saksopplysninger, økonomi, vurderinger og administrasjonens forslag når dette finnes i kildedataene.\n"
+        "Protokollen er fasit for vedtak og avstemning. "
+        "Møteinnkalling og saksliste skal brukes aktivt til å forklare saken med fakta: bakgrunn, saksopplysninger, økonomi, vurderinger, innstilling og hva saken gjelder i praksis.\n"
         "Krav:\n"
-        "- title: kort, konkret og nyhetspreget. Gjerne med tydelig poeng eller konsekvens når det finnes i kilden.\n"
+        "- title: kort, konkret og nyhetspreget. Bruk gjerne tall, sted eller tiltak når det finnes i kilden.\n"
         "- title skal være interessant uten klikkbait.\n"
+        "- Ikke bruk generiske titler som 'Kommunestyret har vedtatt sak om ...'.\n"
         "- ingress: 1-2 setninger som oppsummerer hovedpoenget tydelig og gir lyst til å lese videre.\n"
         "- Kommunen SKAL nevnes i ingressen.\n"
         "- Tittel og ingress skal være ulike. Ingressen skal utdype tittelen.\n"
-        "- body: 4-8 korte avsnitt med god flyt og omvendt pyramide.\n"
-        "- Første avsnitt etter ingressen skal forklare hva saken gjelder med konkret bakgrunn fra møteinnkalling/saksliste hvis det finnes.\n"
-        "- Forklar hva som ble diskutert, hva administrasjonen foreslo, hva som ble vedtatt, økonomi/tall og hva dette konkret innebærer for innbyggerne når det fremgår av kilden.\n"
+        "- body: 5-8 korte avsnitt med god flyt og omvendt pyramide.\n"
+        "- Hvert avsnitt skal ha én tydelig oppgave og minst ett konkret faktapunkt når kilden gir grunnlag for det.\n"
+        "- De første 2-3 avsnittene i brødteksten skal forklare hva saken gjelder med konkrete fakta fra møteinnkalling/saksliste når dette finnes.\n"
+        "- Bruk minst to relevante fakta fra møteinnkallingen/sakslisten hvis kildedataene inneholder det.\n"
+        "- Forklar administrasjonens forslag/innstilling når det finnes, men gjør klart hva kommunestyret faktisk vedtok.\n"
+        "- Forklar økonomi, beløp, tiltak, eiendommer, steder, datoer og rammer når dette finnes i kilden.\n"
+        "- Forklar saken enkelt: skriv hva vedtaket gjelder, hvem eller hva det gjelder, og hva som konkret skjer videre når dette står i kilden.\n"
+        "- Ikke tolk politiske motiver eller virkninger som ikke står i kilden.\n"
         "- Ta med uenighet eller ulike synspunkter hvis det finnes i kilden.\n"
         "- Ikke bruk mellomtitler som 'Bakgrunn', 'Vedtaket', 'Oppsummering' eller lignende. Skriv som en ferdig avisartikkel.\n"
         "- Skriv nøkternt og journalistisk, som en lokalavis.\n"
-        "- Unngå byråkratiske formuleringer.\n"
-        "- Bruk korte avsnitt og klart, lettfattelig språk.\n"
+        "- Bruk vanlig språk. Forklar byråkratiske ord med enklere formuleringer.\n"
+        "- Bruk korte setninger. Unngå lange leddsetninger.\n"
+        "- Ikke start flere avsnitt på samme måte.\n"
         "- Skriv vedtaket og relevante saksopplysninger om til vanlig språk uten å endre innhold.\n"
         "- Tall skal være nøyaktige.\n"
         "- Avstemning skal være kort og tydelig når den finnes.\n"
@@ -119,6 +128,32 @@ def build_prompt(protocol: ParsedProtocol, case: ParsedCase) -> str:
         "- Ikke skriv at noe skal sikre, styrke, bidra til, gi bedre tilbud eller ha en bestemt effekt hvis dette ikke står i kildedataene.\n\n"
         f"KILDEDATA:\n{json.dumps(source, ensure_ascii=False, indent=2)}"
     )
+
+
+def extract_supporting_fact_lines(section: str | None, limit: int = 12) -> list[str]:
+    if not section:
+        return []
+
+    lines = [re.sub(r"\s+", " ", line).strip() for line in section.splitlines()]
+    lines = [line for line in lines if 35 <= len(line) <= 260]
+    keyword_pattern = re.compile(
+        r"bakgrunn|saksopplys|vurdering|økonom|kostnad|budsjett|investering|"
+        r"innstilling|forslag til vedtak|konsekvens|formål|behov|plan|tiltak|"
+        r"kommune|kommunal|eiendom|kroner|kr\.?|million",
+        flags=re.IGNORECASE,
+    )
+    number_pattern = re.compile(r"\b\d[\d\s.,]*\b")
+
+    facts: list[str] = []
+    for line in lines:
+        normalized = normalize_article_sentence(line)
+        if not normalized or normalized in facts:
+            continue
+        if keyword_pattern.search(normalized) or number_pattern.search(normalized):
+            facts.append(normalized)
+        if len(facts) >= limit:
+            break
+    return facts
 
 
 def find_supporting_excerpt(protocol: ParsedProtocol, case: ParsedCase) -> str | None:
