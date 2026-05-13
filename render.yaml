@@ -1,10 +1,10 @@
 services:
   - type: web
-    name: kommunenytt
+    name: kommunenytt-web
     runtime: docker
     dockerfilePath: ./Dockerfile
     plan: starter
-    dockerCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    dockerCommand: /bin/sh -c 'uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-10000}'
     envVars:
       - key: OPENAI_API_KEY
         sync: false
@@ -36,7 +36,7 @@ services:
         value: false
 
   - type: cron
-    name: kommunenytt-daily-indre-fosen
+    name: kommunenytt-cron-indre-fosen
     runtime: docker
     dockerfilePath: ./Dockerfile
     schedule: "0 6,7,10,11,13,14 * * *"
@@ -72,7 +72,7 @@ services:
         value: false
 
   - type: cron
-    name: kommunenytt-daily-osen
+    name: kommunenytt-cron-osen
     runtime: docker
     dockerfilePath: ./Dockerfile
     schedule: "0 6,7,10,11,13,14 * * *"
@@ -108,7 +108,7 @@ services:
         value: false
 
   - type: cron
-    name: kommunenytt-daily-afjord
+    name: kommunenytt-cron-afjord
     runtime: docker
     dockerfilePath: ./Dockerfile
     schedule: "0 6,7,10,11,13,14 * * *"
@@ -144,7 +144,7 @@ services:
         value: false
 
   - type: cron
-    name: kommunenytt-daily-orland
+    name: kommunenytt-cron-orland
     runtime: docker
     dockerfilePath: ./Dockerfile
     schedule: "0 6,7,10,11,13,14 * * *"
