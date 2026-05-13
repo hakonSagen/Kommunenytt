@@ -18,17 +18,17 @@ services:
       - key: ORLAND_URL
         value: https://www.orland.kommune.no/vare-tjenester/politikk-planer-og-organisasjon/politikk/politisk-moteplan/
       - key: SMTP_HOST
-        sync: false
+        value: smtp.gmail.com
       - key: SMTP_PORT
         value: 587
       - key: SMTP_USERNAME
-        sync: false
+        value: fosnafolketskrapebot@gmail.com
       - key: SMTP_PASSWORD
         sync: false
       - key: SMTP_FROM
         value: fosnafolketskrapebot@gmail.com
       - key: SMTP_TO
-        sync: false
+        value: hakon.sagen@fosna-folket.no
       - key: SMTP_USE_TLS
         value: true
       - key: DRY_RUN_EMAIL
@@ -54,17 +54,17 @@ services:
       - key: ORLAND_URL
         value: https://www.orland.kommune.no/vare-tjenester/politikk-planer-og-organisasjon/politikk/politisk-moteplan/
       - key: SMTP_HOST
-        sync: false
+        value: smtp.gmail.com
       - key: SMTP_PORT
         value: 587
       - key: SMTP_USERNAME
-        sync: false
+        value: fosnafolketskrapebot@gmail.com
       - key: SMTP_PASSWORD
         sync: false
       - key: SMTP_FROM
         value: fosnafolketskrapebot@gmail.com
       - key: SMTP_TO
-        sync: false
+        value: hakon.sagen@fosna-folket.no
       - key: SMTP_USE_TLS
         value: true
       - key: DRY_RUN_EMAIL
@@ -90,17 +90,17 @@ services:
       - key: ORLAND_URL
         value: https://www.orland.kommune.no/vare-tjenester/politikk-planer-og-organisasjon/politikk/politisk-moteplan/
       - key: SMTP_HOST
-        sync: false
+        value: smtp.gmail.com
       - key: SMTP_PORT
         value: 587
       - key: SMTP_USERNAME
-        sync: false
+        value: fosnafolketskrapebot@gmail.com
       - key: SMTP_PASSWORD
         sync: false
       - key: SMTP_FROM
         value: fosnafolketskrapebot@gmail.com
       - key: SMTP_TO
-        sync: false
+        value: hakon.sagen@fosna-folket.no
       - key: SMTP_USE_TLS
         value: true
       - key: DRY_RUN_EMAIL
@@ -126,17 +126,17 @@ services:
       - key: ORLAND_URL
         value: https://www.orland.kommune.no/vare-tjenester/politikk-planer-og-organisasjon/politikk/politisk-moteplan/
       - key: SMTP_HOST
-        sync: false
+        value: smtp.gmail.com
       - key: SMTP_PORT
         value: 587
       - key: SMTP_USERNAME
-        sync: false
+        value: fosnafolketskrapebot@gmail.com
       - key: SMTP_PASSWORD
         sync: false
       - key: SMTP_FROM
         value: fosnafolketskrapebot@gmail.com
       - key: SMTP_TO
-        sync: false
+        value: hakon.sagen@fosna-folket.no
       - key: SMTP_USE_TLS
         value: true
       - key: DRY_RUN_EMAIL
@@ -162,17 +162,17 @@ services:
       - key: ORLAND_URL
         value: https://www.orland.kommune.no/vare-tjenester/politikk-planer-og-organisasjon/politikk/politisk-moteplan/
       - key: SMTP_HOST
-        sync: false
+        value: smtp.gmail.com
       - key: SMTP_PORT
         value: 587
       - key: SMTP_USERNAME
-        sync: false
+        value: fosnafolketskrapebot@gmail.com
       - key: SMTP_PASSWORD
         sync: false
       - key: SMTP_FROM
         value: fosnafolketskrapebot@gmail.com
       - key: SMTP_TO
-        sync: false
+        value: hakon.sagen@fosna-folket.no
       - key: SMTP_USE_TLS
         value: true
       - key: DRY_RUN_EMAIL
