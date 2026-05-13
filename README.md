@@ -235,14 +235,14 @@ Duplikatkontroll gjøres på `source_url`, slik at samme protokoll ikke prosesse
 
 ## Automatisering og dobbeltutsending
 
-Cron-jobbene på Render er satt opp til å sjekke alle fire kommuner klokken 08.00, 12.00 og 15.00 norsk tid.
+Cron-jobbene på Render er satt opp til å sjekke alle fire kommuner klokken 08.00 og 12.00 norsk tid.
 
-Render kjører cron-uttrykk i UTC. Derfor starter `render.yaml` jobbene på begge mulige UTC-tider for norsk sommer- og vintertid, og CLI-en slipper bare gjennom kjøringer der lokal tid i `Europe/Oslo` er 08, 12 eller 15.
+Render kjører cron-uttrykk i UTC. Derfor starter `render.yaml` jobbene på begge mulige UTC-tider for norsk sommer- og vintertid, og CLI-en slipper bare gjennom kjøringer der lokal tid i `Europe/Oslo` er 08 eller 12.
 
 Eksempel:
 
 ```bash
-python -m app.cli --municipality indre-fosen --only-at-hours 8,12,15
+python -m app.cli --municipality indre-fosen --only-at-hours 8,12
 ```
 
 Regelen for e-post er enkel:
@@ -263,7 +263,7 @@ Regelen for e-post er enkel:
    - cron job for Osen
    - cron job for Åfjord
    - cron job for Ørland
-   - hver cron job sjekker klokken 08.00, 12.00 og 15.00 norsk tid
+   - hver cron job sjekker klokken 08.00 og 12.00 norsk tid
 4. Sett hemmelige miljøvariabler i Render:
    - `OPENAI_API_KEY`
    - SMTP-verdier

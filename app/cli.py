@@ -44,7 +44,7 @@ def main() -> None:
     parser.add_argument(
         "--only-at-hours",
         type=_parse_hours,
-        help="Kjor bare ved disse lokale timene, f.eks. 8,12,15.",
+        help="Kjor bare ved disse lokale timene, f.eks. 8,12.",
     )
     parser.add_argument(
         "--timezone",
