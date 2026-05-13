@@ -74,7 +74,7 @@ services:
     name: kommunenytt-cron-osen
     runtime: docker
     dockerfilePath: ./Dockerfile
-    schedule: "0 6,7,10,11,13,14 * * *"
+    schedule: "10 6,7,10,11,13,14 * * *"
     dockerCommand: python -m app.cli --municipality osen --only-at-hours 8,12,15
     envVars:
       - key: OPENAI_API_KEY
@@ -110,7 +110,7 @@ services:
     name: kommunenytt-cron-afjord
     runtime: docker
     dockerfilePath: ./Dockerfile
-    schedule: "0 6,7,10,11,13,14 * * *"
+    schedule: "20 6,7,10,11,13,14 * * *"
     dockerCommand: python -m app.cli --municipality afjord --only-at-hours 8,12,15
     envVars:
       - key: OPENAI_API_KEY
@@ -146,7 +146,7 @@ services:
     name: kommunenytt-cron-orland
     runtime: docker
     dockerfilePath: ./Dockerfile
-    schedule: "0 6,7,10,11,13,14 * * *"
+    schedule: "30 6,7,10,11,13,14 * * *"
     dockerCommand: python -m app.cli --municipality orland --only-at-hours 8,12,15
     envVars:
       - key: OPENAI_API_KEY

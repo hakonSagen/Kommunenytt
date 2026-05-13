@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, Query
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, Response
 from sqlalchemy.orm import Session
 
 from app.config import ensure_directories, settings
@@ -38,6 +38,16 @@ def index() -> dict:
             "/articles/{filename}",
         ],
     }
+
+
+@app.head("/")
+def index_head() -> Response:
+    return Response(status_code=200)
+
+
+@app.get("/health")
+def health() -> dict:
+    return {"status": "ok"}
 
 
 async def _run_indre_fosen_job(force: bool, protocol_index: int, db: Session) -> dict:
