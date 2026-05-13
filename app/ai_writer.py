@@ -46,9 +46,10 @@ def generate_article(protocol: ParsedProtocol) -> Article:
                 "Du skriver ferdige nyhetsartikler basert på kommunestyresaker. "
                 "Du må kun bruke informasjon som finnes i teksten du får. "
                 "Du skal ikke dikte opp fakta, hendelser, sitater eller tall. "
-                "Du skal bruke møteinnkalling og saksliste aktivt når de inneholder relevante fakta. "
+                "Du skal bruke møteinnkalling og saksliste som støttekilde når de inneholder relevante fakta. "
+                "Støttekilden skal brukes til å beskrive tiltak, fremdrift, gjennomføring, kostnader, frister og administrasjonens innstilling. "
                 "Du skal gjøre tungt saks- og vedtaksspråk enkelt å forstå. "
-                "Hvis noe er uklart eller mangler, skal du ikke gjette. "
+                "Hvis noe er uklart eller mangler, skal du skrive at det ikke står i kildene. "
                 "Skriv alltid på norsk bokmål. Hvis kildeteksten er på nynorsk, oversetter du til bokmål."
             ),
         },
@@ -96,7 +97,7 @@ def build_prompt(protocol: ParsedProtocol, case: ParsedCase) -> str:
         "Skriv en ferdig nyhetsartikkel basert på denne kommunestyresaken.\n"
         "Svar kun som JSON med feltene title, ingress, body og some.\n"
         "Protokollen er fasit for vedtak og avstemning. "
-        "Møteinnkalling og saksliste skal brukes aktivt til å forklare saken med fakta: bakgrunn, saksopplysninger, økonomi, vurderinger, innstilling og hva saken gjelder i praksis.\n"
+        "Møteinnkalling og saksliste er støttekilder. De skal brukes aktivt til å forklare saken med fakta: bakgrunn, saksopplysninger, tiltak, økonomi, vurderinger, innstilling, fremdriftsplan, gjennomføring og hva saken gjelder i praksis.\n"
         "Krav:\n"
         "- title: kort, konkret og nyhetspreget. Bruk gjerne tall, sted eller tiltak når det finnes i kilden.\n"
         "- title skal være interessant uten klikkbait.\n"
@@ -108,9 +109,12 @@ def build_prompt(protocol: ParsedProtocol, case: ParsedCase) -> str:
         "- Hvert avsnitt skal ha én tydelig oppgave og minst ett konkret faktapunkt når kilden gir grunnlag for det.\n"
         "- De første 2-3 avsnittene i brødteksten skal forklare hva saken gjelder med konkrete fakta fra møteinnkalling/saksliste når dette finnes.\n"
         "- Bruk minst to relevante fakta fra møteinnkallingen/sakslisten hvis kildedataene inneholder det.\n"
+        "- Bruk møteinnkallingen til å beskrive tiltaket, fremdriftsplan for gjennomføring og andre konkrete saksopplysninger når dette står der.\n"
+        "- Beskriv om administrasjonen anbefalte det samme som politikerne vedtok, eller om innstillingen var noe annet, når dette står i møteinnkallingen eller protokollen.\n"
         "- Forklar administrasjonens forslag/innstilling når det finnes, men gjør klart hva kommunestyret faktisk vedtok.\n"
-        "- Forklar økonomi, beløp, tiltak, eiendommer, steder, datoer og rammer når dette finnes i kilden.\n"
+        "- Forklar økonomi, beløp, tiltak, eiendommer, steder, datoer, frister og rammer når dette finnes i kilden.\n"
         "- Forklar saken enkelt: skriv hva vedtaket gjelder, hvem eller hva det gjelder, og hva som konkret skjer videre når dette står i kilden.\n"
+        "- Dersom det ikke står noe i møteinnkallingen eller protokollen om gjennomføring, kostnader, tidspunkt, frister eller andre viktige nøkkelopplysninger, skriv tydelig i saken at dokumentene ikke opplyser dette.\n"
         "- Ikke tolk politiske motiver eller virkninger som ikke står i kilden.\n"
         "- Ta med uenighet eller ulike synspunkter hvis det finnes i kilden.\n"
         "- Ikke bruk mellomtitler som 'Bakgrunn', 'Vedtaket', 'Oppsummering' eller lignende. Skriv som en ferdig avisartikkel.\n"
@@ -138,7 +142,8 @@ def extract_supporting_fact_lines(section: str | None, limit: int = 12) -> list[
     lines = [line for line in lines if 35 <= len(line) <= 260]
     keyword_pattern = re.compile(
         r"bakgrunn|saksopplys|vurdering|økonom|kostnad|budsjett|investering|"
-        r"innstilling|forslag til vedtak|konsekvens|formål|behov|plan|tiltak|"
+        r"innstilling|anbefal|forslag til vedtak|konsekvens|formål|behov|plan|tiltak|"
+        r"gjennomføring|fremdrift|framdrift|frist|tidspunkt|dato|periode|"
         r"kommune|kommunal|eiendom|kroner|kr\.?|million",
         flags=re.IGNORECASE,
     )
