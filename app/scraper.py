@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import hashlib
 import re
+import urllib.request
 from urllib.parse import urljoin, urlparse
 
-from playwright.async_api import Browser, Page, async_playwright
+from playwright.async_api import Page, Route, async_playwright
 
 from app.config import settings
 from models.schemas import DocumentLink, MeetingDocument, SupportingDocument
@@ -12,11 +13,19 @@ from models.schemas import DocumentLink, MeetingDocument, SupportingDocument
 
 PROTOCOL_WORDS = ("møteprotokoll", "protokoll", "vedtaksprotokoll")
 AGENDA_WORDS = ("saksliste", "innkalling")
+CHROMIUM_ARGS = [
+    "--disable-dev-shm-usage",
+    "--disable-background-networking",
+    "--disable-default-apps",
+    "--disable-extensions",
+    "--disable-gpu",
+    "--no-sandbox",
+]
 
 
 async def fetch_indre_fosen_protocol(protocol_index: int = 0) -> MeetingDocument:
     return await fetch_protocol_from_links(
-        links=await find_indre_fosen_documents(),
+        links=await find_indre_fosen_documents(min_protocols=protocol_index + 1),
         municipality="Indre Fosen",
         protocol_index=protocol_index,
     )
@@ -24,7 +33,7 @@ async def fetch_indre_fosen_protocol(protocol_index: int = 0) -> MeetingDocument
 
 async def fetch_osen_protocol(protocol_index: int = 0) -> MeetingDocument:
     return await fetch_protocol_from_links(
-        links=await find_osen_documents(),
+        links=await find_osen_documents(min_protocols=protocol_index + 1),
         municipality="Osen",
         protocol_index=protocol_index,
     )
@@ -32,7 +41,7 @@ async def fetch_osen_protocol(protocol_index: int = 0) -> MeetingDocument:
 
 async def fetch_afjord_protocol(protocol_index: int = 0) -> MeetingDocument:
     return await fetch_protocol_from_links(
-        links=await find_afjord_documents(),
+        links=await find_afjord_documents(min_protocols=protocol_index + 1),
         municipality="Åfjord",
         protocol_index=protocol_index,
     )
@@ -40,7 +49,7 @@ async def fetch_afjord_protocol(protocol_index: int = 0) -> MeetingDocument:
 
 async def fetch_orland_protocol(protocol_index: int = 0) -> MeetingDocument:
     return await fetch_protocol_from_links(
-        links=await find_orland_documents(),
+        links=await find_orland_documents(min_protocols=protocol_index + 1),
         municipality="Ørland",
         protocol_index=protocol_index,
     )
@@ -71,31 +80,39 @@ async def fetch_protocol_from_links(
     return await download_document(selected, municipality=municipality)
 
 
-async def find_indre_fosen_documents() -> list[DocumentLink]:
-    return await find_acos_meeting_documents(settings.indre_fosen_url)
+async def find_indre_fosen_documents(min_protocols: int = 8) -> list[DocumentLink]:
+    return await find_acos_meeting_documents(settings.indre_fosen_url, min_protocols=min_protocols)
 
 
-async def find_osen_documents() -> list[DocumentLink]:
-    return await find_acos_meeting_documents(settings.osen_url)
+async def find_osen_documents(min_protocols: int = 8) -> list[DocumentLink]:
+    return await find_acos_meeting_documents(settings.osen_url, min_protocols=min_protocols)
 
 
-async def find_afjord_documents() -> list[DocumentLink]:
-    return await find_acos_meeting_documents(settings.afjord_url)
+async def find_afjord_documents(min_protocols: int = 8) -> list[DocumentLink]:
+    return await find_acos_meeting_documents(settings.afjord_url, min_protocols=min_protocols)
 
 
-async def find_orland_documents() -> list[DocumentLink]:
-    return await find_acos_meeting_documents(settings.orland_url)
+async def find_orland_documents(min_protocols: int = 8) -> list[DocumentLink]:
+    return await find_acos_meeting_documents(settings.orland_url, min_protocols=min_protocols)
 
 
-async def find_acos_meeting_documents(base_url: str) -> list[DocumentLink]:
+async def find_acos_meeting_documents(base_url: str, min_protocols: int = 8) -> list[DocumentLink]:
     async with async_playwright() as pw:
-        browser = await pw.chromium.launch(headless=True)
+        browser = await pw.chromium.launch(headless=True, args=CHROMIUM_ARGS)
         try:
-            page = await browser.new_page()
-            await page.goto(base_url, wait_until="networkidle", timeout=60_000)
+            context = await browser.new_context()
+            page = await context.new_page()
+            await page.route("**/*", _block_heavy_resource)
+            await page.goto(base_url, wait_until="domcontentloaded", timeout=60_000)
+            await page.wait_for_timeout(2500)
             await _dismiss_cookie_dialog(page)
-            detail_links = await _collect_held_meeting_detail_links(page, base_url=base_url, max_pages=4)
-            protocol_links = await _collect_protocol_links_from_details(page, detail_links, base_url=base_url)
+            detail_links = await _collect_held_meeting_detail_links(page, base_url=base_url, max_pages=2)
+            protocol_links = await _collect_protocol_links_from_details(
+                page,
+                detail_links,
+                base_url=base_url,
+                min_protocols=min_protocols,
+            )
             if protocol_links:
                 return protocol_links
 
@@ -103,6 +120,13 @@ async def find_acos_meeting_documents(base_url: str) -> list[DocumentLink]:
             return await _collect_document_links(page, base_url)
         finally:
             await browser.close()
+
+
+async def _block_heavy_resource(route: Route) -> None:
+    if route.request.resource_type in {"image", "media", "font", "stylesheet"}:
+        await route.abort()
+        return
+    await route.continue_()
 
 
 async def _dismiss_cookie_dialog(page: Page) -> None:
@@ -156,12 +180,17 @@ async def _collect_detail_links_from_current_page(page: Page, base_url: str) -> 
     return links
 
 
-async def _collect_protocol_links_from_details(page: Page, detail_links: list[str], base_url: str) -> list[DocumentLink]:
+async def _collect_protocol_links_from_details(
+    page: Page,
+    detail_links: list[str],
+    base_url: str,
+    min_protocols: int,
+) -> list[DocumentLink]:
     protocol_links: list[DocumentLink] = []
-    for detail_url in detail_links:
+    for detail_url in detail_links[:8]:
         try:
-            await page.goto(detail_url, wait_until="networkidle", timeout=60_000)
-            await page.wait_for_timeout(2000)
+            await page.goto(detail_url, wait_until="domcontentloaded", timeout=60_000)
+            await page.wait_for_timeout(1200)
         except Exception:
             continue
 
@@ -203,6 +232,8 @@ async def _collect_protocol_links_from_details(page: Page, detail_links: list[st
         for protocol_link in protocol_candidates:
             protocol_link.related_links = agenda_links
             protocol_links.append(protocol_link)
+            if len(protocol_links) >= min_protocols:
+                return protocol_links
     return protocol_links
 
 
@@ -218,52 +249,46 @@ async def _meeting_title_from_page(page: Page) -> str:
 
 
 async def download_document(link: DocumentLink, municipality: str) -> MeetingDocument:
-    async with async_playwright() as pw:
-        browser = await pw.chromium.launch(headless=True)
+    content_type, content = _http_get(link.url)
+    supporting_documents = []
+    for related_link in link.related_links:
         try:
-            context = await browser.new_context()
-            response = await context.request.get(link.url, timeout=60_000)
-            if not response.ok:
-                raise RuntimeError(f"Kunne ikke hente dokument: {response.status} {link.url}")
+            supporting_documents.append(_download_supporting_document(related_link))
+        except Exception:
+            continue
 
-            content_type = response.headers.get("content-type", "application/octet-stream")
-            content = await response.body()
-            if "text/html" in content_type.lower() and not link.url.lower().endswith(".pdf"):
-                page = await context.new_page()
-                await page.goto(link.url, wait_until="networkidle", timeout=60_000)
-                content = (await page.content()).encode("utf-8")
-                content_type = "text/html; charset=utf-8"
-
-            supporting_documents = []
-            for related_link in link.related_links:
-                try:
-                    supporting_documents.append(await _download_supporting_document(context, related_link))
-                except Exception:
-                    continue
-
-            return MeetingDocument(
-                municipality=municipality,
-                source_url=link.url,
-                title=link.title,
-                document_type=link.document_type,
-                content_type=content_type,
-                content=content,
-                supporting_documents=supporting_documents,
-            )
-        finally:
-            await browser.close()
+    return MeetingDocument(
+        municipality=municipality,
+        source_url=link.url,
+        title=link.title,
+        document_type=link.document_type,
+        content_type=content_type,
+        content=content,
+        supporting_documents=supporting_documents,
+    )
 
 
-async def _download_supporting_document(context, link: DocumentLink) -> SupportingDocument:
-    response = await context.request.get(link.url, timeout=60_000)
-    if not response.ok:
-        raise RuntimeError(f"Kunne ikke hente støttedokument: {response.status} {link.url}")
+def _http_get(url: str) -> tuple[str, bytes]:
+    request = urllib.request.Request(
+        url,
+        headers={
+            "User-Agent": "Kommunenytt/1.0 (+https://kommunenytt-web.onrender.com)",
+            "Accept": "application/pdf,text/html,application/octet-stream,*/*",
+        },
+    )
+    with urllib.request.urlopen(request, timeout=60) as response:
+        content_type = response.headers.get("content-type", "application/octet-stream")
+        return content_type, response.read()
+
+
+def _download_supporting_document(link: DocumentLink) -> SupportingDocument:
+    content_type, content = _http_get(link.url)
     return SupportingDocument(
         title=link.title,
         source_url=link.url,
         document_type=link.document_type,
-        content_type=response.headers.get("content-type", "application/octet-stream"),
-        content=await response.body(),
+        content_type=content_type,
+        content=content,
     )
 
 
