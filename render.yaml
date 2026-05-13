@@ -27,7 +27,7 @@ services:
       - key: SMTP_PASSWORD
         sync: false
       - key: SMTP_FROM
-        sync: false
+        value: fosnafolketskrapebot@gmail.com
       - key: SMTP_TO
         sync: false
       - key: SMTP_USE_TLS
@@ -63,7 +63,7 @@ services:
       - key: SMTP_PASSWORD
         sync: false
       - key: SMTP_FROM
-        sync: false
+        value: fosnafolketskrapebot@gmail.com
       - key: SMTP_TO
         sync: false
       - key: SMTP_USE_TLS
@@ -99,7 +99,7 @@ services:
       - key: SMTP_PASSWORD
         sync: false
       - key: SMTP_FROM
-        sync: false
+        value: fosnafolketskrapebot@gmail.com
       - key: SMTP_TO
         sync: false
       - key: SMTP_USE_TLS
@@ -135,7 +135,7 @@ services:
       - key: SMTP_PASSWORD
         sync: false
       - key: SMTP_FROM
-        sync: false
+        value: fosnafolketskrapebot@gmail.com
       - key: SMTP_TO
         sync: false
       - key: SMTP_USE_TLS
@@ -171,7 +171,7 @@ services:
       - key: SMTP_PASSWORD
         sync: false
       - key: SMTP_FROM
-        sync: false
+        value: fosnafolketskrapebot@gmail.com
       - key: SMTP_TO
         sync: false
       - key: SMTP_USE_TLS
