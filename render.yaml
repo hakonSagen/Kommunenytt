@@ -9,6 +9,10 @@ services:
         sync: false
       - key: OPENAI_MODEL
         value: gpt-5.2
+      - key: DATABASE_URL
+        fromDatabase:
+          name: kommunenytt-db
+          property: connectionString
       - key: INDRE_FOSEN_URL
         value: https://www.indrefosen.kommune.no/tjenester/politikk-planer-og-okonomi/politikk/moteoversikt-og-sok-etter-vedtak/
       - key: OSEN_URL
@@ -45,6 +49,10 @@ services:
         sync: false
       - key: OPENAI_MODEL
         value: gpt-5.2
+      - key: DATABASE_URL
+        fromDatabase:
+          name: kommunenytt-db
+          property: connectionString
       - key: INDRE_FOSEN_URL
         value: https://www.indrefosen.kommune.no/tjenester/politikk-planer-og-okonomi/politikk/moteoversikt-og-sok-etter-vedtak/
       - key: OSEN_URL
@@ -81,6 +89,10 @@ services:
         sync: false
       - key: OPENAI_MODEL
         value: gpt-5.2
+      - key: DATABASE_URL
+        fromDatabase:
+          name: kommunenytt-db
+          property: connectionString
       - key: INDRE_FOSEN_URL
         value: https://www.indrefosen.kommune.no/tjenester/politikk-planer-og-okonomi/politikk/moteoversikt-og-sok-etter-vedtak/
       - key: OSEN_URL
@@ -117,6 +129,10 @@ services:
         sync: false
       - key: OPENAI_MODEL
         value: gpt-5.2
+      - key: DATABASE_URL
+        fromDatabase:
+          name: kommunenytt-db
+          property: connectionString
       - key: INDRE_FOSEN_URL
         value: https://www.indrefosen.kommune.no/tjenester/politikk-planer-og-okonomi/politikk/moteoversikt-og-sok-etter-vedtak/
       - key: OSEN_URL
@@ -153,6 +169,10 @@ services:
         sync: false
       - key: OPENAI_MODEL
         value: gpt-5.2
+      - key: DATABASE_URL
+        fromDatabase:
+          name: kommunenytt-db
+          property: connectionString
       - key: INDRE_FOSEN_URL
         value: https://www.indrefosen.kommune.no/tjenester/politikk-planer-og-okonomi/politikk/moteoversikt-og-sok-etter-vedtak/
       - key: OSEN_URL
@@ -177,3 +197,9 @@ services:
         value: true
       - key: DRY_RUN_EMAIL
         value: false
+
+databases:
+  - name: kommunenytt-db
+    databaseName: kommunenytt
+    user: kommunenytt
+    plan: starter
