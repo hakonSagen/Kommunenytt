@@ -51,9 +51,25 @@ def main() -> None:
         default="Europe/Oslo",
         help="Tidssone for --only-at-hours.",
     )
+    parser.add_argument(
+        "--skip-weekends",
+        action="store_true",
+        help="Ikke prosesser eller send e-post på lørdag og søndag.",
+    )
     args = parser.parse_args()
 
     now = datetime.now(ZoneInfo(args.timezone))
+    if args.skip_weekends and now.weekday() >= 5:
+        result = {
+            "status": "skipped_weekend",
+            "reason": "Jobben kjører ikke lørdag og søndag.",
+            "local_time": now.isoformat(timespec="minutes"),
+            "email_attempted": False,
+            "email_sent": False,
+        }
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+
     if args.only_at_hours and now.hour not in args.only_at_hours:
         result = {
             "status": "skipped_schedule",

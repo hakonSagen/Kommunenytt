@@ -34,6 +34,8 @@ class Settings:
     smtp_to: str | None = os.getenv("SMTP_TO")
     smtp_use_tls: bool = os.getenv("SMTP_USE_TLS", "true").lower() == "true"
     dry_run_email: bool = os.getenv("DRY_RUN_EMAIL", "true").lower() == "true"
+    skip_weekend_email: bool = os.getenv("SKIP_WEEKEND_EMAIL", "true").lower() == "true"
+    email_timezone: str = os.getenv("EMAIL_TIMEZONE", "Europe/Oslo")
 
     indre_fosen_url: str = os.getenv(
         "INDRE_FOSEN_URL",

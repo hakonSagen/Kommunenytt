@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import smtplib
+from datetime import datetime
 from email.message import EmailMessage
+from zoneinfo import ZoneInfo
 
 from app.config import settings
 from models.schemas import Article
@@ -10,6 +12,9 @@ from models.schemas import Article
 def send_article_email(article: Article, html: str) -> bool:
     if settings.dry_run_email:
         print(f"DRY_RUN_EMAIL=true: ville sendt artikkel til {settings.smtp_to}: {article.title}")
+        return False
+    if settings.skip_weekend_email and is_weekend():
+        print(f"SKIP_WEEKEND_EMAIL=true: sender ikke e-post i helgen: {article.title}")
         return False
 
     required = [settings.smtp_host, settings.smtp_username, settings.smtp_password, settings.smtp_to]
@@ -30,3 +35,8 @@ def send_article_email(article: Article, html: str) -> bool:
         smtp.login(settings.smtp_username, settings.smtp_password)
         smtp.send_message(message)
     return True
+
+
+def is_weekend() -> bool:
+    now = datetime.now(ZoneInfo(settings.email_timezone))
+    return now.weekday() >= 5

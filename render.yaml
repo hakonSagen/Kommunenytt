@@ -35,13 +35,15 @@ services:
         value: true
       - key: DRY_RUN_EMAIL
         value: false
+      - key: SKIP_WEEKEND_EMAIL
+        value: true
 
   - type: cron
     name: kommunenytt-cron-indre-fosen
     runtime: docker
     dockerfilePath: ./Dockerfile
     schedule: "0 6,7,10,11 * * *"
-    dockerCommand: python -m app.cli --only-at-hours 8,12
+    dockerCommand: python -m app.cli --only-at-hours 8,12 --skip-weekends
     envVars:
       - key: OPENAI_API_KEY
         sync: false
@@ -73,13 +75,15 @@ services:
         value: true
       - key: DRY_RUN_EMAIL
         value: false
+      - key: SKIP_WEEKEND_EMAIL
+        value: true
 
   - type: cron
     name: kommunenytt-cron-osen
     runtime: docker
     dockerfilePath: ./Dockerfile
     schedule: "10 6,7,10,11 * * *"
-    dockerCommand: python -m app.cli --municipality osen --only-at-hours 8,12
+    dockerCommand: python -m app.cli --municipality osen --only-at-hours 8,12 --skip-weekends
     envVars:
       - key: OPENAI_API_KEY
         sync: false
@@ -111,13 +115,15 @@ services:
         value: true
       - key: DRY_RUN_EMAIL
         value: false
+      - key: SKIP_WEEKEND_EMAIL
+        value: true
 
   - type: cron
     name: kommunenytt-cron-afjord
     runtime: docker
     dockerfilePath: ./Dockerfile
     schedule: "20 6,7,10,11 * * *"
-    dockerCommand: python -m app.cli --municipality afjord --only-at-hours 8,12
+    dockerCommand: python -m app.cli --municipality afjord --only-at-hours 8,12 --skip-weekends
     envVars:
       - key: OPENAI_API_KEY
         sync: false
@@ -149,13 +155,15 @@ services:
         value: true
       - key: DRY_RUN_EMAIL
         value: false
+      - key: SKIP_WEEKEND_EMAIL
+        value: true
 
   - type: cron
     name: kommunenytt-cron-orland
     runtime: docker
     dockerfilePath: ./Dockerfile
     schedule: "30 6,7,10,11 * * *"
-    dockerCommand: python -m app.cli --municipality orland --only-at-hours 8,12
+    dockerCommand: python -m app.cli --municipality orland --only-at-hours 8,12 --skip-weekends
     envVars:
       - key: OPENAI_API_KEY
         sync: false
@@ -187,3 +195,5 @@ services:
         value: true
       - key: DRY_RUN_EMAIL
         value: false
+      - key: SKIP_WEEKEND_EMAIL
+        value: true
